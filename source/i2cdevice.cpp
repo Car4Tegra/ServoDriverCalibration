@@ -57,9 +57,9 @@ namespace CAR4TEGRA
    }
 
 
-   bool I2cDevice::openBus(const std::string& arBusName)
+   bool I2cDevice::openBus(const std::string& acrBusName)
    {
-      mI2CBusName = arBusName;
+      mI2CBusName = acrBusName;
 
       // try to open bus
       if((mI2CBus = open(mI2CBusName.c_str(), O_RDWR)) < 0)
@@ -94,9 +94,9 @@ namespace CAR4TEGRA
    }
 
 
-   bool I2cDevice::openDevice(const std::string& arBusName, int aAddress)
+   bool I2cDevice::openDevice(const std::string& acrBusName, int aAddress)
    {
-      if(this->openBus(arBusName) < 0)
+      if(this->openBus(acrBusName) < 0)
       {
          return false;
       }
