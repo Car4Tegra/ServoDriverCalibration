@@ -44,6 +44,7 @@
 #include <string>
 
 // Car4Tegra includes
+#include "include/pca9685defines.hpp"
 #include "include/i2cdevice.hpp"
 
 
@@ -95,7 +96,7 @@ namespace CAR4TEGRA
       /**
        * @brief Resets the current opened PCA9685 device
        *
-       * @return `TRUE` if device has been resetted successfully, `FALSE` otherwise
+       * @return `TRUE` if device has been reseted successfully, `FALSE` otherwise
        */
       bool reset();
 
@@ -109,7 +110,7 @@ namespace CAR4TEGRA
        *
        * @param[in]  aRegister      Register to read from
        *
-       * @return Returns the regeister value or `-1` if something went wrong
+       * @return Returns the register value or `-1` if something went wrong
        */
       int readRegister(int aRegister);
 
@@ -123,7 +124,47 @@ namespace CAR4TEGRA
        */
       int writeRegister(int aRegister, int aValue);
 
+
+      /**
+       * @brief Writes the PWM settings for a single channel
+       *
+       * @param[in]  aFrequency     Freqeuncy for PWM reference oscillator (24 - 1526 Hz)
+       */
+      void setPWMFrequency(float aFrequency);
+
+
+      /**
+       * @brief Writes the PWM settings for a single channel
+       *
+       * @param[in]  aChannel       Channel number (0 - 15)
+       * @param[in]  aOnValue       Value for PWM ON (0 - 4095)
+       * @param[in]  aOffValue      Value for PWM OFF (0 - 4095)
+       */
+      void setPWM(int aChannel, int aOnValue, int aOffValue);
+
+
+      /**
+       * @brief Writes the PWM settings for all channels
+       *
+       * @param[in]  aOnValue       Value for PWM ON (0 - 4095)
+       * @param[in]  aOffValue      Value for PWM OFF (0 - 4095)
+       */
+      void setAllPWM(int aOnValue, int aOffValue);
+
       /** @} */
+
+
+   private:
+
+      /**
+       * @brief Checks a given bit
+       *
+       * @param[in]  aValue      Value to check
+       * @param[in]  aBitMask    Bit mask to check
+       *
+       * @return Returns the value of the bit (0 or 1)
+       */
+      int checkBit(int aValue, int aBitMask);
 
 
    private:

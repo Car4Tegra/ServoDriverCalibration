@@ -21,7 +21,8 @@ SOURCES += \
 HEADERS  += \
     include/mainwindow.hpp \
     include/pca9685.hpp \
-    include/i2cdevice.hpp
+    include/i2cdevice.hpp \
+    include/pca9685defines.hpp
 
 FORMS    += \
     resource/mainwindow.ui
