@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  * @file i2cdevice.cpp
- * @date 02.05.2017
+ * @date 02.04.2017
  *
  * @brief This file contains the definition of class I2cDevice at namespace CAR4TEGRA
  *
@@ -38,7 +38,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-// internal includes
+// Car4Tegra includes
 #include "include/i2cdevice.hpp"
 
 
@@ -182,4 +182,4 @@ namespace CAR4TEGRA
 
       return lRes;
    }
-}
+} // namespace CAR4TEGRA

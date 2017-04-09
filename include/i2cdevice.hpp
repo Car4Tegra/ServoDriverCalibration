@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  * @file i2cdevice.hpp
- * @date 02.05.2017
+ * @date 02.04.2017
  *
  * @brief This file contains the declaration of class I2cDevice at namespace CAR4TEGRA
  *
@@ -35,8 +35,8 @@
  */
 
 
-#ifndef I2cDevice_H
-#define I2cDevice_H
+#ifndef I2CDEVICE_H
+#define I2CDEVICE_H
 
 
 // std includes
@@ -139,7 +139,7 @@ namespace CAR4TEGRA
       std::string mI2CBusName;   ///< Name of the currently opened I2C bus
       int mI2CBus;               ///< File pointer to the currently opened I2C bus
       int mDevAddress;           ///< Address of the currently opened I2C device
-   };
-}
+   }; // class I2cDevice
+}  // namespace CAR4TEGRA
 
-#endif // I2cDevice_H
+#endif // I2CDEVICE_H
