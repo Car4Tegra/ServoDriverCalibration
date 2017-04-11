@@ -73,20 +73,16 @@ namespace CAR4TEGRA
        * @brief Opens a specified I2C bus
        *
        * @param[in]  acrBusName     Name of the bus (format: "/dev/i2c-0")
-       *
-       * @return `TRUE` if bus has been opened successfully, `FALSE` otherwise
        */
-      bool openBus(const std::string& acrBusName);
+      void openBus(const std::string& acrBusName);
 
 
       /**
        * @brief Opens a specified I2C device
        *
        * @param[in]  aAddress       Adress of the I2C device
-       *
-       * @return `TRUE` if device has been opened successfully, `FALSE` otherwise
        */
-      bool openDevice(int aAddress);
+      void openDevice(int aAddress);
 
 
       /**
@@ -94,18 +90,14 @@ namespace CAR4TEGRA
        *
        * @param[in]  acrBusName     Name of the bus (format: "/dev/i2c-0")
        * @param[in]  aAddress       Adress of the I2C device
-       *
-       * @return `TRUE` if device has been opened successfully, `FALSE` otherwise
        */
-      bool openDevice(const std::string& acrBusName, int aAddress);
+      void openDevice(const std::string& acrBusName, int aAddress);
 
 
       /**
        * @brief Closes the current opened I2C bus
-       *
-       * @return `TRUE` if bus has been closed (or was already closed) successfully, `FALSE` otherwise
        */
-      bool closeBus();
+      void closeBus();
 
       /** @} */
 

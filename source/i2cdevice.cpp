@@ -37,6 +37,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <exception>
+#include <stdexcept>
 
 // Car4Tegra includes
 #include "include/i2cdevice.hpp"
@@ -57,68 +59,58 @@ namespace CAR4TEGRA
    }
 
 
-   bool I2cDevice::openBus(const std::string& acrBusName)
+   void I2cDevice::openBus(const std::string& acrBusName)
    {
       mI2CBusName = acrBusName;
 
       // try to open bus
       if((mI2CBus = open(mI2CBusName.c_str(), O_RDWR)) < 0)
       {
-         printf("Failed to open I2C bus \"%s\" (Error %i)\n", mI2CBusName.c_str(), errno);
-         return false;
+         throw std::runtime_error("Failed to open I2C bus \"" + mI2CBusName +
+                                  "\" (Error " + std::to_string(errno) + ")");
       }
-
-      return true;
    }
 
 
-   bool I2cDevice::openDevice(int aAddress)
+   void I2cDevice::openDevice(int aAddress)
    {
       mDevAddress = aAddress;
 
       // check if bus is open
       if(mI2CBus < 0)
       {
-         printf("Failed to open I2C device: I2C bus is not open");
-         return false;
+         throw std::runtime_error("Failed to open I2C device: I2C bus is not open");
       }
 
       // try to open
       if(ioctl(mI2CBus, I2C_SLAVE, mDevAddress) < 0)
       {
-         printf("Failed to open I2C device \"%#X\" (Error %i)\n", mDevAddress, errno);
-         return false;
+         throw std::runtime_error("Failed to open I2C device \"" + std::to_string(mDevAddress) +
+                                  "\" (Error " + std::to_string(errno) + ")");
       }
-
-      return true;
    }
 
 
-   bool I2cDevice::openDevice(const std::string& acrBusName, int aAddress)
+   void I2cDevice::openDevice(const std::string& acrBusName, int aAddress)
    {
-      if(this->openBus(acrBusName) < 0)
-      {
-         return false;
-      }
-
-      return this->openDevice(aAddress);
+      this->openBus(acrBusName);
+      this->openDevice(aAddress);
    }
 
 
-   bool I2cDevice::closeBus()
+   void I2cDevice::closeBus()
    {
       if(mI2CBus > 0)
       {
          if(!close(mI2CBus))
          {
-            printf("Failed to close I2C bus \"%s\" (Error %i)\n", mI2CBusName.c_str(), errno);
-            return false;
+            throw std::runtime_error("Failed to close I2C bus \"" + mI2CBusName +
+                                     "\" (Error " + std::to_string(errno) + ")");
          }
       }
 
       mDevAddress = 0x00;
       mI2CBus = -1;
-      return true;
    }
 
 
@@ -127,15 +119,13 @@ namespace CAR4TEGRA
       // check if bus is open
       if(mI2CBus < 0)
       {
-         printf("Failed to read from I2C device: I2C bus is not open");
-         return -1;
+         throw std::runtime_error("Failed to read from I2C device: I2C bus is not open");
       }
 
       // check if device is open
       if(mDevAddress == 0x00)
       {
-         printf("Failed to read from I2C device: I2C device is not open");
-         return -1;
+         throw std::runtime_error("Failed to read from I2C device: I2C device is not open");
       }
 
 
@@ -145,8 +135,9 @@ namespace CAR4TEGRA
       // check if reading was succesfully
       if(lRes < 0)
       {
-         printf("Failed to read register \"%#X\" from I2C device \"%#X\" (Error %i)\n", aRegister, mDevAddress, errno);
-         return -1;
+         throw std::runtime_error("Failed to read register \"" + std::to_string(aRegister) +
+                                  "\" from I2C device \"" + std::to_string(mDevAddress) +
+                                  "\" (Error " + std::to_string(errno) + ")");
       }
 
       return lRes;
@@ -158,15 +149,13 @@ namespace CAR4TEGRA
       // check if bus is open
       if(mI2CBus < 0)
       {
-         printf("Failed to write to I2C device: I2C bus is not open");
-         return -1;
+         throw std::runtime_error("Failed to read from I2C device: I2C bus is not open");
       }
 
       // check if device is open
       if(mDevAddress == 0x00)
       {
-         printf("Failed to write to I2C device: I2C device is not open");
-         return -1;
+         throw std::runtime_error("Failed to read from I2C device: I2C device is not open");
       }
 
 
@@ -176,8 +165,10 @@ namespace CAR4TEGRA
       // check if writing was succesfully
       if(lRes < 0)
       {
-         printf("Failed to write register \"%#X\" from I2C device \"%#X\" with value \"%#X\" (Error %i)\n", aRegister, mDevAddress, aValue, errno);
-         return -1;
+         throw std::runtime_error("Failed to write register \"" + std::to_string(aRegister) +
+                                  "\" from I2C device \"" + std::to_string(mDevAddress) +
+                                  "\" with value \"" + std::to_string(aValue) +
+                                  "\" (Error " + std::to_string(errno) + ")");
       }
 
       return lRes;

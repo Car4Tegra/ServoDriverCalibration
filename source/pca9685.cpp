@@ -34,6 +34,8 @@
 // std includes
 #include <unistd.h>
 #include <math.h>
+#include <exception>
+#include <stdexcept>
 
 
 // Car4Tegra includes
@@ -55,36 +57,32 @@ namespace CAR4TEGRA
    }
 
 
-   bool PCA9685::openDevice(const std::string arBusName, int aAddress)
+   void PCA9685::openDevice(const std::string arBusName, int aAddress)
    {
       mBusName = arBusName;
       mAddress = aAddress;
 
-      return mpI2CDevice->openDevice(arBusName, aAddress);
+      mpI2CDevice->openDevice(arBusName, aAddress);
    }
 
 
-   bool PCA9685::close()
+   void PCA9685::close()
    {
       mBusName = "";
       mAddress = 0x00;
 
-      return mpI2CDevice->closeBus();
+      mpI2CDevice->closeBus();
    }
 
 
-   bool PCA9685::reset()
+   void PCA9685::reset()
    {
       // write basic settings
-      if(this->writeRegister(PCA9685_REG_MODE1, PCA9685_MODE1_ALLCALL) < 0)
-         return false;
-      if(this->writeRegister(PCA9685_REG_MODE2, PCA9685_MODE2_OUTDRV) < 0)
-         return false;
+      this->writeRegister(PCA9685_REG_MODE1, PCA9685_MODE1_ALLCALL);
+      this->writeRegister(PCA9685_REG_MODE2, PCA9685_MODE2_OUTDRV);
 
       // wait for oscillator (at least 500us)
       usleep(2000);
-
-      return true;
    }
 
 
@@ -129,7 +127,11 @@ namespace CAR4TEGRA
    {
       // check if valid channel
       if(aChannel > 15 || aChannel < 0)
-         return;
+      {
+         throw std::range_error("Invalid channel \"" + std::to_string(aChannel) +
+                                "\" (has to be between 0 and 15)");
+      }
+
 
       // limit arguments to allowed range
       int lOnValue = fmin(fmax(aOnValue, 0), 4095);

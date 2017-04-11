@@ -79,26 +79,20 @@ namespace CAR4TEGRA
        *
        * @param[in]  acrBusName     Name of the I2C bus (format: "/dev/i2c-0")
        * @param[in]  aAddress       Adress of the PCA9685 device
-       *
-       * @return `TRUE` if bus has been opened successfully, `FALSE` otherwise
        */
-      bool openDevice(const std::string acrBusName, int aAddress);
+      void openDevice(const std::string acrBusName, int aAddress);
 
 
       /**
        * @brief Closes the current opened PCA9685 device
-       *
-       * @return `TRUE` if device has been closed (or was already closed) successfully, `FALSE` otherwise
        */
-      bool close();
+      void close();
 
 
       /**
        * @brief Resets the current opened PCA9685 device
-       *
-       * @return `TRUE` if device has been reseted successfully, `FALSE` otherwise
        */
-      bool reset();
+      void reset();
 
       /** @} */
 
