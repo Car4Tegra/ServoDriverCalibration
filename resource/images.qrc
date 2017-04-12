@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/car/images">
+        <file>Arrow_Left.png</file>
+        <file>Arrow_Right.png</file>
+        <file>Car_Left.png</file>
+        <file>Car_Right.png</file>
+        <file>Car.png</file>
+    </qresource>
+    <qresource prefix="/logo">
+        <file>Logo_1x.png</file>
+        <file>Logo_1x_White.png</file>
+    </qresource>
+</RCC>

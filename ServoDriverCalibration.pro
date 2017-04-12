@@ -28,3 +28,6 @@ FORMS    += \
     resource/mainwindow.ui
 
 CONFIG += c++14
+
+RESOURCES += \
+    resource/images.qrc

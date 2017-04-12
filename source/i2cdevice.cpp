@@ -39,6 +39,8 @@
 #include <unistd.h>
 #include <exception>
 #include <stdexcept>
+#include <string.h>
+#include <sys/ioctl.h>
 
 // Car4Tegra includes
 #include "include/i2cdevice.hpp"
@@ -67,7 +69,8 @@ namespace CAR4TEGRA
       if((mI2CBus = open(mI2CBusName.c_str(), O_RDWR)) < 0)
       {
          throw std::runtime_error("Failed to open I2C bus \"" + mI2CBusName +
-                                  "\" (Error " + std::to_string(errno) + ")");
+                                  "\" (Error " + std::to_string(errno) +
+                                  ": " + strerror(errno) + ")");
       }
    }
 
@@ -82,11 +85,12 @@ namespace CAR4TEGRA
          throw std::runtime_error("Failed to open I2C device: I2C bus is not open");
       }
 
-      // try to open
-      if(ioctl(mI2CBus, I2C_SLAVE, mDevAddress) < 0)
+      // try to open (address has to be shifted by 1 to remove r/w bit
+      if(ioctl(mI2CBus, I2C_SLAVE, mDevAddress / 2) < 0)
       {
          throw std::runtime_error("Failed to open I2C device \"" + std::to_string(mDevAddress) +
-                                  "\" (Error " + std::to_string(errno) + ")");
+                                  "\" (Error " + std::to_string(errno) +
+                                  ": " + strerror(errno) + ")");
       }
    }
 
@@ -102,10 +106,11 @@ namespace CAR4TEGRA
    {
       if(mI2CBus > 0)
       {
-         if(!close(mI2CBus))
+         if(close(mI2CBus) < 0)
          {
             throw std::runtime_error("Failed to close I2C bus \"" + mI2CBusName +
-                                     "\" (Error " + std::to_string(errno) + ")");
+                                     "\" (Error " + std::to_string(errno) +
+                                     ": " + strerror(errno) + ")");
          }
       }
 
@@ -137,7 +142,8 @@ namespace CAR4TEGRA
       {
          throw std::runtime_error("Failed to read register \"" + std::to_string(aRegister) +
                                   "\" from I2C device \"" + std::to_string(mDevAddress) +
-                                  "\" (Error " + std::to_string(errno) + ")");
+                                  "\" (Error " + std::to_string(errno) +
+                                  ": " + strerror(errno) + ")");
       }
 
       return lRes;
@@ -168,7 +174,8 @@ namespace CAR4TEGRA
          throw std::runtime_error("Failed to write register \"" + std::to_string(aRegister) +
                                   "\" from I2C device \"" + std::to_string(mDevAddress) +
                                   "\" with value \"" + std::to_string(aValue) +
-                                  "\" (Error " + std::to_string(errno) + ")");
+                                  "\" (Error " + std::to_string(errno) +
+                                  ": " + strerror(errno) + ")");
       }
 
       return lRes;
