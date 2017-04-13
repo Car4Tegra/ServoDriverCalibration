@@ -124,6 +124,39 @@ private:
    QString binToHex(QString aBinValue);
 
 
+   /**
+    * @brief Enables or disables the GUI elements used for the I2C settings
+    *
+    * @param[in]  aEnable     Enable I2C setting GUI elements
+    */
+   void enableI2CSettings(bool aEnable);
+
+
+   /**
+    * @brief Updated visualization of speed elements (arrow images)
+    *
+    * @param[in]  aValue      New PWM value
+    */
+   void updateSpeedVisualization(int aValue);
+
+
+   /**
+    * @brief Updated visualization of steering elements (car image)
+    *
+    * @param[in]  aValue      New PWM value
+    */
+   void updateSteerVisualization(int aValue);
+
+
+   /**
+    * @brief Writes PWM value to the selected channel
+    *
+    * @param[in]  aChannel    Device Channel (0 - 15)
+    * @param[in]  aValue      PWM value (0 - 4095)
+    */
+   void setPWMValue(int aChannel, int aValue);
+
+
 private slots:
    /**
     * @brief Connect button clicked

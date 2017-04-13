@@ -66,8 +66,8 @@ void MainWindow::init()
    mPosSpeedBot = mpUi->sBSpeedBot->pos();
 
    // init GUI elements with default values
-   mpUi->btConnect->setEnabled(true);
-   mpUi->btDisconnect->setEnabled(false);
+
+   this->enableI2CSettings(true);
 
    mpUi->leAddressHex->setText(QLatin1String(I2C_DEVICE_DEFAULT));
    mpUi->leAddressBin->setText(this->hexToBin(QLatin1String(I2C_DEVICE_DEFAULT)));
@@ -150,6 +150,75 @@ QString MainWindow::binToHex(QString aBinValue)
 }
 
 
+void MainWindow::enableI2CSettings(bool aEnable)
+{
+   mpUi->btConnect->setEnabled(aEnable);
+   mpUi->btDisconnect->setEnabled(!aEnable);
+   mpUi->cbBusSelect->setEnabled(aEnable);
+   mpUi->leAddressBin->setEnabled(aEnable);
+   mpUi->leAddressHex->setEnabled(aEnable);
+}
+
+
+void MainWindow::updateSpeedVisualization(int aValue)
+{
+   // get invertation status
+   bool lInv = mpUi->cbInvSpeed->isChecked();
+
+   // check if direction is forward or backward
+   int lMid = (mpUi->sBSpeedTop->value() - mpUi->sBSpeedBot->value()) / 2 + mpUi->sBSpeedBot->value();
+   bool lStop = (aValue == lMid);
+   bool lForward = ((aValue > lMid) && !lInv) ||
+                   ((aValue < lMid) && lInv);
+
+   // updated GUI elements for speed visualization
+   mpUi->lDir1->setPixmap(lForward ? QPixmap(":/car/images/Arrow_Right.png") : QPixmap(":/car/images/Arrow_Left.png"));
+   mpUi->lDir2->setPixmap(lForward ? QPixmap(":/car/images/Arrow_Right.png") : QPixmap(":/car/images/Arrow_Left.png"));
+
+   // show speed visualization GUI elements only if not stopped
+   mpUi->lDir1->setVisible(!lStop);
+   mpUi->lDir2->setVisible(!lStop);
+}
+
+
+void MainWindow::updateSteerVisualization(int aValue)
+{
+   // get invertation status
+   bool lInv = mpUi->cbInvSteer->isChecked();
+
+   // check if direction is left or right
+   int lMid = (mpUi->sBSteerTop->value() - mpUi->sBSteerBot->value()) / 2 + mpUi->sBSteerBot->value();
+   int zw = mpUi->slidSteer->value();
+   bool lNeutral = (aValue == lMid);
+   bool lLeft = ((aValue > lMid) && !lInv) ||
+                   ((aValue < lMid) && lInv);
+
+   // updated GUI elements for steering visualization
+   if(lNeutral)
+      mpUi->lImage->setPixmap(QPixmap(":/car/images/Car.png"));
+   else
+      mpUi->lImage->setPixmap(lLeft ? QPixmap(":/car/images/Car_Left.png") : QPixmap(":/car/images/Car_Right.png"));
+}
+
+
+void MainWindow::setPWMValue(int aChannel, int aValue)
+{
+   try
+   {
+      // write new value to device
+      mpDriver->setPWM(aChannel, 0, aValue);
+   }
+   catch(const std::runtime_error e)
+   {
+      mpUi->tbLog->append(QLatin1String(e.what()));
+   }
+   catch(const std::exception e)
+   {
+      mpUi->tbLog->append(QLatin1String(e.what()));
+   }
+}
+
+
 void MainWindow::on_btConnect_clicked()
 {
    try
@@ -160,11 +229,7 @@ void MainWindow::on_btConnect_clicked()
                            mpUi->leAddressHex->text().toInt(&lCheck, 16));
 
       // disable bus / device settings
-      mpUi->btConnect->setEnabled(false);
-      mpUi->btDisconnect->setEnabled(true);
-      mpUi->cbBusSelect->setEnabled(false);
-      mpUi->leAddressBin->setEnabled(false);
-      mpUi->leAddressHex->setEnabled(false);
+      this->enableI2CSettings(false);
 
       mpUi->tbLog->append("Connected to 0x" + mpUi->leAddressHex->text() +
                           " on bus " + mpUi->cbBusSelect->currentText());
@@ -206,11 +271,7 @@ void MainWindow::on_btDisconnect_clicked()
       mpDriver->close();
 
       // enable bus / device settings
-      mpUi->btConnect->setEnabled(true);
-      mpUi->btDisconnect->setEnabled(false);
-      mpUi->cbBusSelect->setEnabled(true);
-      mpUi->leAddressBin->setEnabled(true);
-      mpUi->leAddressHex->setEnabled(true);
+      this->enableI2CSettings(true);
 
       mpUi->tbLog->append("Disconnected");
    }
@@ -247,21 +308,10 @@ void MainWindow::on_sBSpeedBot_editingFinished()
    {
       mpUi->slidSpeed->setValue(mpUi->sBSpeedBot->value());
       mpUi->lSpeedVal->setText(QString::number(mpUi->slidSpeed->value()));
-      try
-      {
-         // write new value to device
-         mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, mpUi->slidSpeed->value());
-      }
-      catch(const std::runtime_error e)
-      {
-         mpUi->tbLog->append(QLatin1String(e.what()));
-      }
-      catch(const std::exception e)
-      {
-         mpUi->tbLog->append(QLatin1String(e.what()));
-      }
+      this->setPWMValue(mpUi->sbChannelSpeed->value(), mpUi->slidSpeed->value());
    }
    mpUi->slidSpeed->setMinimum(mpUi->sBSpeedBot->value());
+   this->updateSpeedVisualization(mpUi->slidSpeed->value());
 }
 
 
@@ -272,21 +322,10 @@ void MainWindow::on_sBSpeedTop_editingFinished()
    {
       mpUi->slidSpeed->setValue(mpUi->sBSpeedTop->value());
       mpUi->lSpeedVal->setText(QString::number(mpUi->slidSpeed->value()));
-      try
-      {
-         // write new value to device
-         mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, mpUi->slidSpeed->value());
-      }
-      catch(const std::runtime_error e)
-      {
-         mpUi->tbLog->append(QLatin1String(e.what()));
-      }
-      catch(const std::exception e)
-      {
-         mpUi->tbLog->append(QLatin1String(e.what()));
-      }
+      this->setPWMValue(mpUi->sbChannelSpeed->value(), mpUi->slidSpeed->value());
    }
    mpUi->slidSpeed->setMaximum(mpUi->sBSpeedTop->value());
+   this->updateSpeedVisualization(mpUi->sBSpeedTop->value());
 }
 
 
@@ -297,21 +336,10 @@ void MainWindow::on_sBSteerBot_editingFinished()
    {
       mpUi->slidSteer->setValue(mpUi->sBSteerBot->value());
       mpUi->lSteerVal->setText(QString::number(mpUi->slidSteer->value()));
-      try
-      {
-         // write new value to device
-         mpDriver->setPWM(mpUi->sbChannelSteer->value(), 0, mpUi->slidSteer->value());
-      }
-      catch(const std::runtime_error e)
-      {
-         mpUi->tbLog->append(QLatin1String(e.what()));
-      }
-      catch(const std::exception e)
-      {
-         mpUi->tbLog->append(QLatin1String(e.what()));
-      }
+      this->setPWMValue(mpUi->sbChannelSteer->value(), mpUi->slidSteer->value());
    }
    mpUi->slidSteer->setMinimum(mpUi->sBSteerBot->value());
+   this->updateSteerVisualization(mpUi->slidSteer->value());
 }
 
 
@@ -322,114 +350,24 @@ void MainWindow::on_sBSteerTop_editingFinished()
    {
       mpUi->slidSteer->setValue(mpUi->sBSteerTop->value());
       mpUi->lSteerVal->setText(QString::number(mpUi->slidSteer->value()));
-      try
-      {
-         // write new value to device
-         mpDriver->setPWM(mpUi->sbChannelSteer->value(), 0, mpUi->slidSteer->value());
-      }
-      catch(const std::runtime_error e)
-      {
-         mpUi->tbLog->append(QLatin1String(e.what()));
-      }
-      catch(const std::exception e)
-      {
-         mpUi->tbLog->append(QLatin1String(e.what()));
-      }
+      this->setPWMValue(mpUi->sbChannelSteer->value(), mpUi->slidSteer->value());
    }
    mpUi->slidSteer->setMaximum(mpUi->sBSteerTop->value());
+   this->updateSteerVisualization(mpUi->slidSteer->value());
 }
 
 
 void MainWindow::on_slidSpeed_sliderMoved(int aPosition)
 {
-   int lMid = (mpUi->sBSpeedTop->value() - mpUi->sBSpeedBot->value()) / 2 + mpUi->sBSpeedBot->value();
-   if(aPosition < lMid)
-   {
-      if(mpUi->cbInvSpeed->isChecked())
-      {
-         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
-         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
-      }
-      else
-      {
-         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
-         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
-      }
-      mpUi->lDir1->setVisible(true);
-      mpUi->lDir2->setVisible(true);
-   }
-   else if(aPosition > lMid)
-   {
-      if(mpUi->cbInvSpeed->isChecked())
-      {
-         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
-         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
-      }
-      else
-      {
-         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
-         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
-      }
-      mpUi->lDir1->setVisible(true);
-      mpUi->lDir2->setVisible(true);
-   }
-   else
-   {
-      mpUi->lDir1->setVisible(false);
-      mpUi->lDir2->setVisible(false);
-   }
-
-   try
-   {
-      // write new value to device
-      mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, mpUi->slidSpeed->value());
-   }
-   catch(const std::runtime_error e)
-   {
-      mpUi->tbLog->append(QLatin1String(e.what()));
-   }
-   catch(const std::exception e)
-   {
-      mpUi->tbLog->append(QLatin1String(e.what()));
-   }
+   this->updateSpeedVisualization(aPosition);
+   this->setPWMValue(mpUi->sbChannelSpeed->value(), aPosition);
 }
 
 
 void MainWindow::on_slidSteer_sliderMoved(int aPosition)
 {
-   int lMid = (mpUi->sBSteerTop->value() - mpUi->sBSteerBot->value()) / 2 + mpUi->sBSteerBot->value();
-   if(aPosition < lMid)
-   {
-      if(mpUi->cbInvSteer->isChecked())
-         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Left.png"));
-      else
-         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Right.png"));
-   }
-   else if(aPosition > lMid)
-   {
-      if(mpUi->cbInvSteer->isChecked())
-         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Right.png"));
-      else
-         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Left.png"));
-   }
-   else
-   {
-      mpUi->lImage->setPixmap(QPixmap(":/car/images/Car.png"));
-   }
-
-   try
-   {
-      // write new value to device
-      mpDriver->setPWM(mpUi->sbChannelSteer->value(), 0, mpUi->slidSteer->value());
-   }
-   catch(const std::runtime_error e)
-   {
-      mpUi->tbLog->append(QLatin1String(e.what()));
-   }
-   catch(const std::exception e)
-   {
-      mpUi->tbLog->append(QLatin1String(e.what()));
-   }
+   this->updateSteerVisualization(aPosition);
+   this->setPWMValue(mpUi->sbChannelSteer->value(), aPosition);
 }
 
 
@@ -439,25 +377,7 @@ void MainWindow::on_cbInvSteer_clicked(bool aChecked)
    mpUi->sBSteerBot->move(aChecked ? mPosSteerTop : mPosSteerBot);
    mpUi->sBSteerTop->move(aChecked ? mPosSteerBot : mPosSteerTop);
 
-   int lMid = (mpUi->sBSteerTop->value() - mpUi->sBSteerBot->value()) / 2 + mpUi->sBSteerBot->value();
-   if(mpUi->slidSteer->value() < lMid)
-   {
-      if(aChecked)
-         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Left.png"));
-      else
-         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Right.png"));
-   }
-   else if(mpUi->slidSteer->value() > lMid)
-   {
-      if(aChecked)
-         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Right.png"));
-      else
-         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Left.png"));
-   }
-   else
-   {
-      mpUi->lImage->setPixmap(QPixmap(":/car/images/Car.png"));
-   }
+   this->updateSteerVisualization(mpUi->slidSteer->value());
 }
 
 
@@ -467,42 +387,7 @@ void MainWindow::on_cbInvSpeed_clicked(bool aChecked)
    mpUi->sBSpeedBot->move(aChecked ? mPosSpeedTop : mPosSpeedBot);
    mpUi->sBSpeedTop->move(aChecked ? mPosSpeedBot : mPosSpeedTop);
 
-   int lMid = (mpUi->sBSpeedTop->value() - mpUi->sBSpeedBot->value()) / 2 + mpUi->sBSpeedBot->value();
-   if(mpUi->slidSpeed->value() < lMid)
-   {
-      if(aChecked)
-      {
-         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
-         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
-      }
-      else
-      {
-         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
-         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
-      }
-      mpUi->lDir1->setVisible(true);
-      mpUi->lDir2->setVisible(true);
-   }
-   else if(mpUi->slidSpeed->value() > lMid)
-   {
-      if(aChecked)
-      {
-         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
-         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
-      }
-      else
-      {
-         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
-         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
-      }
-      mpUi->lDir1->setVisible(true);
-      mpUi->lDir2->setVisible(true);
-   }
-   else
-   {
-      mpUi->lDir1->setVisible(false);
-      mpUi->lDir2->setVisible(false);
-   }
+   this->updateSpeedVisualization(mpUi->sBSpeedTop->value());
 }
 
 
