@@ -43,9 +43,12 @@
 #define I2C_BUS_LAST                6        ///< ID of the last I2C bus
 #define PWM_MIN                     0        ///< Minimum PWM value
 #define PWM_MAX                     4095     ///< Maximum PWM value
+#define PWM_FREQ_MIN                24.0f    ///< Minimum PWM frequency
+#define PWM_FREQ_MAX                1526.0f  ///< MAXIMUM PWM frequency
 
 #define I2C_BUS_DEFAULT             0        ///< Index of the I2C bus which is selected by default
 #define I2C_DEVICE_DEFAULT          "80"     ///< Address of the PCA9685 device which is selected by default (hex)
+#define PWM_FREQ_DEFAULT            60.0f    ///< Default PWM frequency
 #define I2C_SPEED_CHANNEL_DEFAULT   0        ///< Default PWM channel for ESC
 #define I2C_STEER_CHANNEL_DEFAULT   1        ///< Default PWM channel for steering servo
 #define PWM_SPEED_MIN_DEFAULT       160      ///< Default minimum PWM value for speed control
@@ -204,6 +207,13 @@ private slots:
     * @param[in]  aChecked       Inverting used
     */
    void on_cbInvSpeed_clicked(bool aChecked);
+
+
+   /**
+    * @brief Editing of PWM frequency finished
+    */
+   void on_sBFreq_editingFinished();
+
 
 private:
    Ui::MainWindow* mpUi;            ///< QT UI instance

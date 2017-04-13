@@ -71,11 +71,11 @@ void MainWindow::init()
    }
    mpUi->cbBusSelect->setCurrentIndex(I2C_BUS_DEFAULT);
 
-   mpUi->sBSpeedBot->setMinimum(PWM_SPEED_MIN_DEFAULT);
+   mpUi->sBSpeedBot->setMinimum(PWM_MIN);
    mpUi->sBSpeedBot->setMaximum(PWM_SPEED_MAX_DEFAULT - 1);
    mpUi->sBSpeedBot->setValue(PWM_SPEED_MIN_DEFAULT);
    mpUi->sBSpeedTop->setMinimum(PWM_SPEED_MIN_DEFAULT + 1);
-   mpUi->sBSpeedTop->setMaximum(PWM_SPEED_MAX_DEFAULT);
+   mpUi->sBSpeedTop->setMaximum(PWM_MAX);
    mpUi->sBSpeedTop->setValue(PWM_SPEED_MAX_DEFAULT);
 
    mpUi->slidSpeed->setMinimum(PWM_SPEED_MIN_DEFAULT);
@@ -83,11 +83,11 @@ void MainWindow::init()
    mpUi->slidSpeed->setValue((PWM_SPEED_MAX_DEFAULT - PWM_SPEED_MIN_DEFAULT) / 2 + PWM_SPEED_MIN_DEFAULT);
    mpUi->lSpeedVal->setText(QString::number(mpUi->slidSpeed->value()));
 
-   mpUi->sBSteerBot->setMinimum(PWM_STEER_MIN_DEFAULT);
+   mpUi->sBSteerBot->setMinimum(PWM_MIN);
    mpUi->sBSteerBot->setMaximum(PWM_STEER_MAX_DEFAULT - 1);
    mpUi->sBSteerBot->setValue(PWM_STEER_MIN_DEFAULT);
    mpUi->sBSteerTop->setMinimum(PWM_STEER_MIN_DEFAULT + 1);
-   mpUi->sBSteerTop->setMaximum(PWM_STEER_MAX_DEFAULT);
+   mpUi->sBSteerTop->setMaximum(PWM_MAX);
    mpUi->sBSteerTop->setValue(PWM_STEER_MAX_DEFAULT);
 
    mpUi->slidSteer->setMinimum(PWM_STEER_MIN_DEFAULT);
@@ -103,6 +103,10 @@ void MainWindow::init()
 
    mpUi->sbChannelSpeed->setValue(I2C_SPEED_CHANNEL_DEFAULT);
    mpUi->sbChannelSteer->setValue(I2C_STEER_CHANNEL_DEFAULT);
+
+   mpUi->sBFreq->setMinimum(PWM_FREQ_MIN);
+   mpUi->sBFreq->setMaximum(PWM_FREQ_MAX);
+   mpUi->sBFreq->setValue(PWM_FREQ_DEFAULT);
 }
 
 
@@ -153,7 +157,7 @@ void MainWindow::on_btConnect_clicked()
 
       // set device to default values and disable PWM outputs (value: 0 / 0)
       mpDriver->reset();
-      mpDriver->setPWMFrequency(60);
+      mpDriver->setPWMFrequency((float)mpUi->sBFreq->value());
       mpDriver->setAllPWM(0, 0);
    }
    catch(const std::runtime_error e)
@@ -465,6 +469,26 @@ void MainWindow::on_cbInvSpeed_clicked(bool aChecked)
          lVal = mpUi->slidSpeed->value();
 
       mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, lVal);
+   }
+   catch(const std::runtime_error e)
+   {
+      mpUi->tbLog->append(QLatin1String(e.what()));
+   }
+   catch(const std::exception e)
+   {
+      mpUi->tbLog->append(QLatin1String(e.what()));
+   }
+}
+
+
+void MainWindow::on_sBFreq_editingFinished()
+{
+   try
+   {
+      // set new PWM frequency
+      mpDriver->setPWMFrequency((float)mpUi->sBFreq->value());
+
+      mpUi->tbLog->append("PWM frequency changed to " + QString("%1").arg(mpUi->sBFreq->value(), 0, 'f', 3) + " Hz");
    }
    catch(const std::runtime_error e)
    {
