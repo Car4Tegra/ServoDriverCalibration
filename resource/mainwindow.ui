@@ -273,15 +273,6 @@
              <height>160</height>
             </rect>
            </property>
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="invertedAppearance">
-            <bool>false</bool>
-           </property>
-           <property name="invertedControls">
-            <bool>false</bool>
-           </property>
           </widget>
           <widget class="QSpinBox" name="sBSpeedBot">
            <property name="geometry">

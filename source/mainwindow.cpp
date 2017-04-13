@@ -59,6 +59,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::init()
 {
+   // save default loction of border selection elements (for inverting)
+   mPosSteerTop = mpUi->sBSteerTop->pos();
+   mPosSteerBot = mpUi->sBSteerBot->pos();
+   mPosSpeedTop = mpUi->sBSpeedTop->pos();
+   mPosSpeedBot = mpUi->sBSpeedBot->pos();
+
+   // init GUI elements with default values
    mpUi->btConnect->setEnabled(true);
    mpUi->btDisconnect->setEnabled(false);
 
@@ -71,35 +78,42 @@ void MainWindow::init()
    }
    mpUi->cbBusSelect->setCurrentIndex(I2C_BUS_DEFAULT);
 
-   mpUi->sBSpeedBot->setMinimum(PWM_MIN);
-   mpUi->sBSpeedBot->setMaximum(PWM_SPEED_MAX_DEFAULT - 1);
+   mpUi->cbInvSpeed->setChecked(PWM_SPEED_INV_DEFAULT);
+   mpUi->cbInvSteer->setChecked(PWM_STEER_INV_DEFAULT);
+
+   mpUi->sBSpeedBot->setRange(PWM_MIN, PWM_SPEED_MAX_DEFAULT - 1);
    mpUi->sBSpeedBot->setValue(PWM_SPEED_MIN_DEFAULT);
-   mpUi->sBSpeedTop->setMinimum(PWM_SPEED_MIN_DEFAULT + 1);
-   mpUi->sBSpeedTop->setMaximum(PWM_MAX);
+   mpUi->sBSpeedTop->setRange(PWM_SPEED_MIN_DEFAULT + 1, PWM_MAX);
    mpUi->sBSpeedTop->setValue(PWM_SPEED_MAX_DEFAULT);
+   if(PWM_SPEED_INV_DEFAULT)
+   {
+      mpUi->sBSpeedBot->move(mPosSpeedTop);
+      mpUi->sBSpeedTop->move(mPosSpeedBot);
+   }
 
-   mpUi->slidSpeed->setMinimum(PWM_SPEED_MIN_DEFAULT);
-   mpUi->slidSpeed->setMaximum(PWM_SPEED_MAX_DEFAULT);
+   mpUi->slidSpeed->setRange(PWM_SPEED_MIN_DEFAULT, PWM_SPEED_MAX_DEFAULT);
    mpUi->slidSpeed->setValue((PWM_SPEED_MAX_DEFAULT - PWM_SPEED_MIN_DEFAULT) / 2 + PWM_SPEED_MIN_DEFAULT);
-   mpUi->lSpeedVal->setText(QString::number(mpUi->slidSpeed->value()));
+   mpUi->slidSpeed->setInvertedAppearance(PWM_SPEED_INV_DEFAULT);
+   mpUi->lSpeedVal->setText(QString::number(mpUi->slidSpeed->value()));   
 
-   mpUi->sBSteerBot->setMinimum(PWM_MIN);
-   mpUi->sBSteerBot->setMaximum(PWM_STEER_MAX_DEFAULT - 1);
+   mpUi->sBSteerBot->setRange(PWM_MIN, PWM_STEER_MAX_DEFAULT - 1);
    mpUi->sBSteerBot->setValue(PWM_STEER_MIN_DEFAULT);
-   mpUi->sBSteerTop->setMinimum(PWM_STEER_MIN_DEFAULT + 1);
-   mpUi->sBSteerTop->setMaximum(PWM_MAX);
+   mpUi->sBSteerTop->setRange(PWM_STEER_MIN_DEFAULT + 1, PWM_MAX);
    mpUi->sBSteerTop->setValue(PWM_STEER_MAX_DEFAULT);
+   if(PWM_STEER_INV_DEFAULT)
+   {
+      mpUi->sBSteerBot->move(mPosSteerTop);
+      mpUi->sBSteerTop->move(mPosSteerBot);
+   }
 
    mpUi->slidSteer->setMinimum(PWM_STEER_MIN_DEFAULT);
    mpUi->slidSteer->setMaximum(PWM_STEER_MAX_DEFAULT);
    mpUi->slidSteer->setValue((PWM_STEER_MAX_DEFAULT - PWM_STEER_MIN_DEFAULT) / 2 + PWM_STEER_MIN_DEFAULT);
+   mpUi->slidSteer->setInvertedAppearance(PWM_STEER_INV_DEFAULT);
    mpUi->lSteerVal->setText(QString::number(mpUi->slidSteer->value()));
 
    mpUi->lDir1->setVisible(false);
    mpUi->lDir2->setVisible(false);
-
-   mpUi->cbInvSpeed->setChecked(PWM_SPEED_INV_DEFAULT);
-   mpUi->cbInvSteer->setChecked(PWM_STEER_INV_DEFAULT);
 
    mpUi->sbChannelSpeed->setValue(I2C_SPEED_CHANNEL_DEFAULT);
    mpUi->sbChannelSteer->setValue(I2C_STEER_CHANNEL_DEFAULT);
@@ -236,13 +250,7 @@ void MainWindow::on_sBSpeedBot_editingFinished()
       try
       {
          // write new value to device
-         int lVal = 0;
-         if(mpUi->cbInvSpeed->isChecked())
-            lVal = mpUi->sBSpeedTop->value() - (mpUi->slidSpeed->value() - mpUi->sBSpeedBot->value());
-         else
-            lVal = mpUi->slidSpeed->value();
-
-         mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, lVal);
+         mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, mpUi->slidSpeed->value());
       }
       catch(const std::runtime_error e)
       {
@@ -267,13 +275,7 @@ void MainWindow::on_sBSpeedTop_editingFinished()
       try
       {
          // write new value to device
-         int lVal = 0;
-         if(mpUi->cbInvSpeed->isChecked())
-            lVal = mpUi->sBSpeedTop->value() - (mpUi->slidSpeed->value() - mpUi->sBSpeedBot->value());
-         else
-            lVal = mpUi->slidSpeed->value();
-
-         mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, lVal);
+         mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, mpUi->slidSpeed->value());
       }
       catch(const std::runtime_error e)
       {
@@ -298,13 +300,7 @@ void MainWindow::on_sBSteerBot_editingFinished()
       try
       {
          // write new value to device
-         int lVal = 0;
-         if(mpUi->cbInvSteer->isChecked())
-            lVal = mpUi->sBSteerTop->value() - (mpUi->slidSteer->value() - mpUi->sBSteerBot->value());
-         else
-            lVal = mpUi->slidSteer->value();
-
-         mpDriver->setPWM(mpUi->sbChannelSteer->value(), 0, lVal);
+         mpDriver->setPWM(mpUi->sbChannelSteer->value(), 0, mpUi->slidSteer->value());
       }
       catch(const std::runtime_error e)
       {
@@ -329,13 +325,7 @@ void MainWindow::on_sBSteerTop_editingFinished()
       try
       {
          // write new value to device
-         int lVal = 0;
-         if(mpUi->cbInvSteer->isChecked())
-            lVal = mpUi->sBSteerTop->value() - (mpUi->slidSteer->value() - mpUi->sBSteerBot->value());
-         else
-            lVal = mpUi->slidSteer->value();
-
-         mpDriver->setPWM(mpUi->sbChannelSteer->value(), 0, lVal);
+         mpDriver->setPWM(mpUi->sbChannelSteer->value(), 0, mpUi->slidSteer->value());
       }
       catch(const std::runtime_error e)
       {
@@ -355,15 +345,31 @@ void MainWindow::on_slidSpeed_sliderMoved(int aPosition)
    int lMid = (mpUi->sBSpeedTop->value() - mpUi->sBSpeedBot->value()) / 2 + mpUi->sBSpeedBot->value();
    if(aPosition < lMid)
    {
-      mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
-      mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
+      if(mpUi->cbInvSpeed->isChecked())
+      {
+         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
+         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
+      }
+      else
+      {
+         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
+         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
+      }
       mpUi->lDir1->setVisible(true);
       mpUi->lDir2->setVisible(true);
    }
    else if(aPosition > lMid)
    {
-      mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
-      mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
+      if(mpUi->cbInvSpeed->isChecked())
+      {
+         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
+         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
+      }
+      else
+      {
+         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
+         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
+      }
       mpUi->lDir1->setVisible(true);
       mpUi->lDir2->setVisible(true);
    }
@@ -376,13 +382,7 @@ void MainWindow::on_slidSpeed_sliderMoved(int aPosition)
    try
    {
       // write new value to device
-      int lVal = 0;
-      if(mpUi->cbInvSpeed->isChecked())
-         lVal = mpUi->sBSpeedTop->value() - (mpUi->slidSpeed->value() - mpUi->sBSpeedBot->value());
-      else
-         lVal = mpUi->slidSpeed->value();
-
-      mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, lVal);
+      mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, mpUi->slidSpeed->value());
    }
    catch(const std::runtime_error e)
    {
@@ -400,11 +400,17 @@ void MainWindow::on_slidSteer_sliderMoved(int aPosition)
    int lMid = (mpUi->sBSteerTop->value() - mpUi->sBSteerBot->value()) / 2 + mpUi->sBSteerBot->value();
    if(aPosition < lMid)
    {
-      mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Right.png"));
+      if(mpUi->cbInvSteer->isChecked())
+         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Left.png"));
+      else
+         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Right.png"));
    }
    else if(aPosition > lMid)
    {
-      mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Left.png"));
+      if(mpUi->cbInvSteer->isChecked())
+         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Right.png"));
+      else
+         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Left.png"));
    }
    else
    {
@@ -414,13 +420,7 @@ void MainWindow::on_slidSteer_sliderMoved(int aPosition)
    try
    {
       // write new value to device
-      int lVal = 0;
-      if(mpUi->cbInvSteer->isChecked())
-         lVal = mpUi->sBSteerTop->value() - (mpUi->slidSteer->value() - mpUi->sBSteerBot->value());
-      else
-         lVal = mpUi->slidSteer->value();
-
-      mpDriver->setPWM(mpUi->sbChannelSteer->value(), 0, lVal);
+      mpDriver->setPWM(mpUi->sbChannelSteer->value(), 0, mpUi->slidSteer->value());
    }
    catch(const std::runtime_error e)
    {
@@ -435,48 +435,73 @@ void MainWindow::on_slidSteer_sliderMoved(int aPosition)
 
 void MainWindow::on_cbInvSteer_clicked(bool aChecked)
 {
-   try
-   {
-      // write new value to device
-      int lVal = 0;
-      if(aChecked)
-         lVal = mpUi->sBSteerTop->value() - (mpUi->slidSteer->value() - mpUi->sBSteerBot->value());
-      else
-         lVal = mpUi->slidSteer->value();
+   mpUi->slidSteer->setInvertedAppearance(aChecked);
+   mpUi->sBSteerBot->move(aChecked ? mPosSteerTop : mPosSteerBot);
+   mpUi->sBSteerTop->move(aChecked ? mPosSteerBot : mPosSteerTop);
 
-      mpDriver->setPWM(mpUi->sbChannelSteer->value(), 0, lVal);
-   }
-   catch(const std::runtime_error e)
+   int lMid = (mpUi->sBSteerTop->value() - mpUi->sBSteerBot->value()) / 2 + mpUi->sBSteerBot->value();
+   if(mpUi->slidSteer->value() < lMid)
    {
-      mpUi->tbLog->append(QLatin1String(e.what()));
+      if(aChecked)
+         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Left.png"));
+      else
+         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Right.png"));
    }
-   catch(const std::exception e)
+   else if(mpUi->slidSteer->value() > lMid)
    {
-      mpUi->tbLog->append(QLatin1String(e.what()));
+      if(aChecked)
+         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Right.png"));
+      else
+         mpUi->lImage->setPixmap(QPixmap(":/car/images/Car_Left.png"));
+   }
+   else
+   {
+      mpUi->lImage->setPixmap(QPixmap(":/car/images/Car.png"));
    }
 }
 
 
 void MainWindow::on_cbInvSpeed_clicked(bool aChecked)
 {
-   try
-   {
-      // write new value to device
-      int lVal = 0;
-      if(aChecked)
-         lVal = mpUi->sBSpeedTop->value() - (mpUi->slidSpeed->value() - mpUi->sBSpeedBot->value());
-      else
-         lVal = mpUi->slidSpeed->value();
+   mpUi->slidSpeed->setInvertedAppearance(aChecked);
+   mpUi->sBSpeedBot->move(aChecked ? mPosSpeedTop : mPosSpeedBot);
+   mpUi->sBSpeedTop->move(aChecked ? mPosSpeedBot : mPosSpeedTop);
 
-      mpDriver->setPWM(mpUi->sbChannelSpeed->value(), 0, lVal);
-   }
-   catch(const std::runtime_error e)
+   int lMid = (mpUi->sBSpeedTop->value() - mpUi->sBSpeedBot->value()) / 2 + mpUi->sBSpeedBot->value();
+   if(mpUi->slidSpeed->value() < lMid)
    {
-      mpUi->tbLog->append(QLatin1String(e.what()));
+      if(aChecked)
+      {
+         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
+         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
+      }
+      else
+      {
+         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
+         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
+      }
+      mpUi->lDir1->setVisible(true);
+      mpUi->lDir2->setVisible(true);
    }
-   catch(const std::exception e)
+   else if(mpUi->slidSpeed->value() > lMid)
    {
-      mpUi->tbLog->append(QLatin1String(e.what()));
+      if(aChecked)
+      {
+         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
+         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Left.png"));
+      }
+      else
+      {
+         mpUi->lDir1->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
+         mpUi->lDir2->setPixmap(QPixmap(":/car/images/Arrow_Right.png"));
+      }
+      mpUi->lDir1->setVisible(true);
+      mpUi->lDir2->setVisible(true);
+   }
+   else
+   {
+      mpUi->lDir1->setVisible(false);
+      mpUi->lDir2->setVisible(false);
    }
 }
 

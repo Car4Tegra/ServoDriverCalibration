@@ -218,6 +218,10 @@ private slots:
 private:
    Ui::MainWindow* mpUi;            ///< QT UI instance
    std::unique_ptr<CAR4TEGRA::PCA9685> mpDriver;   ///< PCA9685 device
+   QPoint mPosSteerTop;             ///< Position of steering top border GUI element (for inverting)
+   QPoint mPosSteerBot;             ///< Position of steering bottom border GUI element (for inverting)
+   QPoint mPosSpeedTop;             ///< Position of speed top border GUI element (for inverting)
+   QPoint mPosSpeedBot;             ///< Position of speed bottom border GUI element (for inverting)
 }; // class MainWindow
 
 #endif // MAINWINDOW_H
