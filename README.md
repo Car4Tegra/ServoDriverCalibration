@@ -11,16 +11,33 @@ The code was tested on the following platforms:
 How to connect the PCA9685 to the I2C bus is shown in the [Car4Tegra Wiki](https://wiki.car4tegra.de/index.php?title=Servo_Driver).
 
 ## Software Setup
-The program requires the `libi2c-dev` and `i2c-tools` libraries:
+The program requires the `libi2c-dev`, `i2c-tools` and `qt5-default` (or `qtcreator` instead) packages:
 
 ```Shell
 sudo apt-get install libi2c-dev i2c-tools
+sudo apt-get install qt5-default
 ```
 
-Important is to allow access from user space for the I2C bus files:
+The project could be build without Qt Creator from terminal:
 
 ```Shell
-sudo chmod 666 /dev/i2c-*
+git clone https://github.com/Car4Tegra/ServoDriverCalibration.git
+mkdir ./ServoDriverCalibration/build
+cd ./ServoDriverCalibration/build/
+qmake ./../ServoDriverCalibration.pro
+make
+```
+
+Important is to add the user to the `i2c` group (e.g. user `ubuntu`):
+
+```Shell
+sudo adduser ubuntu i2c
+```
+
+Start the tool with:
+
+```Shell
+./ServoDriverCalibration &
 ```
 
 ## License

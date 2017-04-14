@@ -5,6 +5,8 @@
 
 # C++ objects and libs
 
+/build
+
 *.slo
 *.lo
 *.o
