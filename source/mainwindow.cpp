@@ -188,7 +188,6 @@ void MainWindow::updateSteerVisualization(int aValue)
 
    // check if direction is left or right
    int lMid = (mpUi->sBSteerTop->value() - mpUi->sBSteerBot->value()) / 2 + mpUi->sBSteerBot->value();
-   int zw = mpUi->slidSteer->value();
    bool lNeutral = (aValue == lMid);
    bool lLeft = ((aValue > lMid) && !lInv) ||
                    ((aValue < lMid) && lInv);
