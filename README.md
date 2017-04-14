@@ -28,10 +28,10 @@ qmake ./../ServoDriverCalibration.pro
 make
 ```
 
-Important is to allow access from user space for the I2C bus files:
+Important is to add the user to the `i2c` group (e.g. user `ubuntu`):
 
 ```Shell
-sudo chmod 666 /dev/i2c-*
+sudo adduser ubuntu i2c
 ```
 
 Start the tool with:
