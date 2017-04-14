@@ -98,6 +98,9 @@
                 </item>
                 <item row="0" column="1">
                  <widget class="QLineEdit" name="leAddressHex">
+                  <property name="toolTip">
+                   <string>Slave address in hexadecimal format</string>
+                  </property>
                   <property name="inputMask">
                    <string>&gt;HH</string>
                   </property>
@@ -115,6 +118,9 @@
                 </item>
                 <item row="1" column="1">
                  <widget class="QLineEdit" name="leAddressBin">
+                  <property name="toolTip">
+                   <string>Slave address in binary format</string>
+                  </property>
                   <property name="inputMask">
                    <string>BBBBBBBB</string>
                   </property>
@@ -283,6 +289,9 @@
              <height>27</height>
             </rect>
            </property>
+           <property name="toolTip">
+            <string>Lower border for speed PWM signal</string>
+           </property>
           </widget>
           <widget class="QSpinBox" name="sBSpeedTop">
            <property name="geometry">
@@ -292,6 +301,9 @@
              <width>71</width>
              <height>27</height>
             </rect>
+           </property>
+           <property name="toolTip">
+            <string>Upper border for speed PWM signal</string>
            </property>
           </widget>
           <widget class="QSpinBox" name="sBSteerTop">
@@ -303,6 +315,9 @@
              <height>27</height>
             </rect>
            </property>
+           <property name="toolTip">
+            <string>Upper border for steering PWM signal</string>
+           </property>
           </widget>
           <widget class="QSpinBox" name="sBSteerBot">
            <property name="geometry">
@@ -312,6 +327,9 @@
              <width>71</width>
              <height>27</height>
             </rect>
+           </property>
+           <property name="toolTip">
+            <string>Lower border for steering PWM signal</string>
            </property>
           </widget>
           <widget class="QLabel" name="lSpeedVal">
@@ -355,6 +373,9 @@
              <height>22</height>
             </rect>
            </property>
+           <property name="toolTip">
+            <string>Invert speed control</string>
+           </property>
            <property name="text">
             <string>Inv</string>
            </property>
@@ -368,6 +389,9 @@
              <height>22</height>
             </rect>
            </property>
+           <property name="toolTip">
+            <string>Invert steering control</string>
+           </property>
            <property name="text">
             <string>Inv</string>
            </property>
@@ -380,6 +404,9 @@
              <width>48</width>
              <height>27</height>
             </rect>
+           </property>
+           <property name="toolTip">
+            <string>PWM channel for speed control (ESC)</string>
            </property>
            <property name="maximum">
             <number>15</number>
@@ -406,6 +433,9 @@
              <width>48</width>
              <height>27</height>
             </rect>
+           </property>
+           <property name="toolTip">
+            <string>PWM channel for steering servo</string>
            </property>
            <property name="maximum">
             <number>15</number>
@@ -448,6 +478,9 @@
              <width>91</width>
              <height>27</height>
             </rect>
+           </property>
+           <property name="toolTip">
+            <string>PWM frequency for all PWM channels</string>
            </property>
            <property name="decimals">
             <number>3</number>
