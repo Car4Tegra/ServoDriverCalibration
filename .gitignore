@@ -1,3 +1,8 @@
+# Doxygen ignores
+
+/doxygen/Doxygen.log
+/doxygen/html
+
 # C++ objects and libs
 
 *.slo
